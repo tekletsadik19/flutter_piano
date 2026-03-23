@@ -2,7 +2,7 @@ import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recase/recase.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 
 import '../../data/source/settings.dart';
 import '../view/app.dart';
@@ -297,14 +297,12 @@ extension on Locale {
         code,
         height: 24,
         width: 31,
-        borderRadius: 4,
       );
     }
     return CountryFlag.fromLanguageCode(
       languageCode.toUpperCase(),
       height: 24,
       width: 31,
-      borderRadius: 4,
     );
   }
 }

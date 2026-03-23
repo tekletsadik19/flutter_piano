@@ -1,5 +1,3 @@
-import 'package:app_review/app_review.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,10 +52,9 @@ class _HomeState extends ConsumerState<Home> {
     if (!val) player.stopSustain();
   }
 
-  KeyEventResult onKey(ScaffoldMessengerState messenger, RawKeyEvent event) {
+  KeyEventResult onKey(ScaffoldMessengerState messenger, KeyEvent event) {
     KeyEventResult result = KeyEventResult.ignored;
-    if (event is RawKeyDownEvent) {
-      // Use hardware keyboard for midi notes
+    if (event is KeyDownEvent) {
       final key = event.logicalKey;
       final midiNotes = {
         LogicalKeyboardKey.keyA: 60 + (octaveOffset * 12),
@@ -160,12 +157,7 @@ class _HomeState extends ConsumerState<Home> {
             ),
             if (canSplit) ...[
               IconButton(
-                onPressed: () async {
-                  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
-                    AppReview.requestReview.then((onValue) {
-                      debugPrint('app_review: $onValue');
-                    });
-                  }
+                onPressed: () {
                   ref.read(splitKeyboardProvider.notifier).state =
                       !splitKeyboard;
                 },
@@ -191,7 +183,7 @@ class _HomeState extends ConsumerState<Home> {
         body: Focus(
           focusNode: _focusNode,
           autofocus: true,
-          onKey: (_, event) => onKey(
+          onKeyEvent: (_, event) => onKey(
             ScaffoldMessenger.of(context),
             event,
           ),
