@@ -18,6 +18,8 @@ dependencies:
   audioplayers: ^6.6.0
   intl: any
   country_flags: ^3.2.0
+  google_fonts: ^6.2.1
+  hugeicons: ^1.1.5
 
 dependency_overrides:
   win32: ^5.15.0

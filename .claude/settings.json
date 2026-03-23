@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(dart pub:*)",
+      "WebFetch(domain:pub.dev)",
+      "Read(//Users/apple/.pub-cache/**)",
+      "Bash(flutter analyze:*)"
+    ]
+  }
+}

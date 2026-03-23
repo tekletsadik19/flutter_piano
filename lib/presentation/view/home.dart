@@ -1,218 +1,241 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 
-import '../../data/source/player/player.dart';
-import '../../data/source/settings.dart';
-import '../widget/locale.dart';
-import '../widget/piano_view.dart';
-import '../widget/settings.dart';
+import '../../features/lessons/presentation/view/lessons_screen.dart';
+import 'piano.dart';
 
-class Home extends ConsumerStatefulWidget {
+class Home extends StatelessWidget {
   const Home({super.key});
 
   @override
-  ConsumerState<Home> createState() => _HomeState();
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isWide = MediaQuery.sizeOf(context).width > 600;
+
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 1,
+        shadowColor: theme.colorScheme.shadow.withAlpha(40),
+        scrolledUnderElevation: 1,
+        titleSpacing: 20,
+        title: Text(
+          'Ruth',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedNotification01,
+              color: theme.colorScheme.onSurface,
+              size: 22,
+            ),
+            onPressed: () {},
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 4),
+            _FeaturedBanner(theme: theme),
+            const SizedBox(height: 24),
+            Text(
+              'QUICK ACCESS',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                letterSpacing: 1.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 10),
+            if (isWide)
+              Row(children: [
+                Expanded(
+                  child: _QuickCard(
+                    icon: HugeIcons.strokeRoundedMusicNote01,
+                    label: 'Lessons',
+                    subtitle: 'Structured learning',
+                    onTap: () => _push(context, const LessonsScreen()),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _QuickCard(
+                    icon: HugeIcons.strokeRoundedMusicNote02,
+                    label: 'Free Play',
+                    subtitle: 'Open the piano',
+                    onTap: () => _push(context, const Piano()),
+                  ),
+                ),
+              ])
+            else
+              Column(children: [
+                _QuickCard(
+                  icon: HugeIcons.strokeRoundedMusicNote01,
+                  label: 'Lessons',
+                  subtitle: 'Structured learning',
+                  onTap: () => _push(context, const LessonsScreen()),
+                ),
+                const SizedBox(height: 10),
+                _QuickCard(
+                  icon: HugeIcons.strokeRoundedMusicNote02,
+                  label: 'Free Play',
+                  subtitle: 'Open the piano',
+                  onTap: () => _push(context, const Piano()),
+                ),
+              ]),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _push(BuildContext context, Widget screen) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+  }
 }
 
-class _HomeState extends ConsumerState<Home> {
-  // TODO: flutter_midi_command
-  final player = $Player();
-  final _focusNode = FocusNode();
-  int octaveOffset = 0;
-  int velocity = 127;
-  int nOctaves = 7;
-  bool sustain = false;
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
-
-  Future<void> play(int midi) async {
-    await player.play(midi, sustain: sustain);
-  }
-
-  void adjustOctave(int adjustment) {
-    if (mounted) {
-      setState(() {
-        octaveOffset = (octaveOffset + adjustment).clamp(
-          -nOctaves + 2,
-          nOctaves - 2,
-        );
-      });
-    }
-  }
-
-  void setSustain(bool val) async {
-    setState(() {
-      sustain = val;
-    });
-    if (!val) player.stopSustain();
-  }
-
-  KeyEventResult onKey(ScaffoldMessengerState messenger, KeyEvent event) {
-    KeyEventResult result = KeyEventResult.ignored;
-    if (event is KeyDownEvent) {
-      final key = event.logicalKey;
-      final midiNotes = {
-        LogicalKeyboardKey.keyA: 60 + (octaveOffset * 12),
-        LogicalKeyboardKey.keyW: 61 + (octaveOffset * 12),
-        LogicalKeyboardKey.keyS: 62 + (octaveOffset * 12),
-        LogicalKeyboardKey.keyE: 63 + (octaveOffset * 12),
-        LogicalKeyboardKey.keyD: 64 + (octaveOffset * 12),
-        LogicalKeyboardKey.keyF: 65 + (octaveOffset * 12),
-        LogicalKeyboardKey.keyT: 66 + (octaveOffset * 12),
-        LogicalKeyboardKey.keyG: 67 + (octaveOffset * 12),
-        LogicalKeyboardKey.keyY: 68 + (octaveOffset * 12),
-        LogicalKeyboardKey.keyH: 69 + (octaveOffset * 12),
-        LogicalKeyboardKey.keyU: 70 + (octaveOffset * 12),
-        LogicalKeyboardKey.keyJ: 71 + (octaveOffset * 12),
-        LogicalKeyboardKey.keyK: 72 + (octaveOffset * 12),
-        LogicalKeyboardKey.keyO: 73 + (octaveOffset * 12),
-        LogicalKeyboardKey.keyL: 74 + (octaveOffset * 12),
-        LogicalKeyboardKey.keyP: 75 + (octaveOffset * 12),
-        LogicalKeyboardKey.semicolon: 76 + (octaveOffset * 12),
-        LogicalKeyboardKey.quoteSingle: 77 + (octaveOffset * 12),
-      };
-      if (midiNotes.containsKey(key)) {
-        final midi = midiNotes[key]!;
-        play(midi);
-        result = KeyEventResult.handled;
-      }
-      final octaveAdjustment = {
-        LogicalKeyboardKey.keyZ: -1,
-        LogicalKeyboardKey.keyX: 1,
-      };
-      if (octaveAdjustment.containsKey(key)) {
-        final adjustment = octaveAdjustment[key]!;
-        setState(() {
-          adjustOctave(adjustment);
-          result = KeyEventResult.handled;
-        });
-      }
-      final velocityAdjustment = {
-        LogicalKeyboardKey.keyC: -1,
-        LogicalKeyboardKey.keyV: 1,
-      };
-      if (velocityAdjustment.containsKey(key)) {
-        final adjustment = velocityAdjustment[key]!;
-        setState(() {
-          velocity = (velocity + adjustment).clamp(0, 127);
-          result = KeyEventResult.handled;
-        });
-      }
-      if (key == LogicalKeyboardKey.space) {
-        result = KeyEventResult.handled;
-        setSustain(!sustain);
-      }
-    }
-    return result;
-  }
+class _FeaturedBanner extends StatelessWidget {
+  const _FeaturedBanner({required this.theme});
+  final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {
-    final splitKeyboard = ref.watch(splitKeyboardProvider);
-    return LayoutBuilder(builder: (context, dimens) {
-      final canSplit = dimens.maxHeight > 600;
-      final showControls = dimens.maxWidth > 550;
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(context.locale.title),
-          actions: [
-            if (showControls) ...[
-              IconButton.filled(
-                onPressed: () => adjustOctave(-1),
-                icon: const Icon(Icons.remove),
-                padding: EdgeInsets.zero,
-              ),
-              const SizedBox(width: 4),
-              IconButton.outlined(
-                onPressed: () {
-                  if (mounted) {
-                    setState(() {
-                      octaveOffset = 0;
-                    });
-                  }
-                },
-                icon: Text(
-                  octaveOffset.toString(),
-                  style: const TextStyle(color: Colors.white),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Start Learning',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                padding: EdgeInsets.zero,
-              ),
-              const SizedBox(width: 4),
-              IconButton.filled(
-                onPressed: () => adjustOctave(1),
-                icon: const Icon(Icons.add),
-                padding: EdgeInsets.zero,
-              ),
-              const SizedBox(width: 10),
-            ],
-            Text('${context.locale.sustain}:'),
-            Switch(
-              value: sustain,
-              onChanged: setSustain,
+                const SizedBox(height: 4),
+                Text(
+                  'From beginner to virtuoso,\nat your own pace.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onPrimary.withAlpha(200),
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                FilledButton.tonal(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: theme.colorScheme.onPrimary,
+                    foregroundColor: theme.colorScheme.primary,
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                    textStyle: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const LessonsScreen()),
+                  ),
+                  child: const Text('Browse Lessons'),
+                ),
+              ],
             ),
-            if (canSplit) ...[
-              IconButton(
-                onPressed: () {
-                  ref.read(splitKeyboardProvider.notifier).state =
-                      !splitKeyboard;
-                },
-                icon:
-                    Icon(!splitKeyboard ? Icons.splitscreen : Icons.fullscreen),
-                tooltip: context.locale.splitKeyboard,
+          ),
+          const SizedBox(width: 12),
+          HugeIcon(
+            icon: HugeIcons.strokeRoundedMusicNote03,
+            color: theme.colorScheme.onPrimary.withAlpha(50),
+            size: 80,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickCard extends StatelessWidget {
+  const _QuickCard({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final List<List<dynamic>> icon;
+  final String label;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withAlpha(20),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: HugeIcon(
+                  icon: icon,
+                  color: theme.colorScheme.primary,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedArrowRight01,
+                color: theme.colorScheme.onSurfaceVariant,
+                size: 18,
               ),
             ],
-            Builder(builder: (context) {
-              return IconButton(
-                onPressed: () {
-                  showBottomSheet(
-                    context: context,
-                    builder: (context) => const Settings(),
-                  );
-                },
-                icon: const Icon(Icons.settings),
-              );
-            }),
-          ],
-        ),
-        backgroundColor: Theme.of(context).colorScheme.outlineVariant,
-        body: Focus(
-          focusNode: _focusNode,
-          autofocus: true,
-          onKeyEvent: (_, event) => onKey(
-            ScaffoldMessenger.of(context),
-            event,
           ),
-          child: Builder(builder: (context) {
-            if (canSplit && splitKeyboard) {
-              return Column(
-                children: [
-                  Flexible(
-                    child: PianoView(
-                      octaves: nOctaves,
-                      onPlay: play,
-                    ),
-                  ),
-                  Flexible(
-                    child: PianoView(
-                      octaves: nOctaves,
-                      onPlay: play,
-                    ),
-                  ),
-                ],
-              );
-            }
-            return PianoView(
-              octaves: nOctaves,
-              onPlay: play,
-            );
-          }),
         ),
-      );
-    });
+      ),
+    );
   }
 }
