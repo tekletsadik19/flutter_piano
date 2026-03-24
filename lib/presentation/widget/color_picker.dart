@@ -15,6 +15,7 @@ class ColorPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeColors = [
+      const Color(0xFF0A2463), // deep blue
       Colors.red,
       Colors.pink,
       Colors.purple,
@@ -55,8 +56,8 @@ class ColorPicker extends StatelessWidget {
                         color: item,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: item.value == color.value
-                              ? Colors.black
+                          color: item.toARGB32() == color.toARGB32()
+                              ? Theme.of(context).colorScheme.onSurface
                               : Colors.transparent,
                           width: 2,
                         ),

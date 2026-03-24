@@ -5,6 +5,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../domain/entities/lesson.dart';
 import '../providers/lessons_provider.dart';
 import '../widget/lesson_card.dart';
+import 'lesson_detail_screen.dart';
 
 class LessonsScreen extends ConsumerWidget {
   const LessonsScreen({super.key});
@@ -16,9 +17,6 @@ class LessonsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        elevation: 1,
-        shadowColor: theme.colorScheme.shadow.withAlpha(40),
-        scrolledUnderElevation: 1,
         titleSpacing: 0,
         leading: const BackButton(),
         title: Text(
@@ -191,7 +189,14 @@ class _LevelSection extends StatelessWidget {
               ],
             ),
           ),
-          ...lessons.map((l) => LessonCard(lesson: l)),
+          ...lessons.map((l) => LessonCard(
+                lesson: l,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => LessonDetailScreen(lesson: l),
+                  ),
+                ),
+              )),
           const SizedBox(height: 16),
         ],
       ),

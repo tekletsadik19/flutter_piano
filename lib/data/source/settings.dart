@@ -30,7 +30,7 @@ final themeColorProvider = StateProvider<Color>((ref) {
     final prefs = await ref.watch(prefsProvider.future);
     await prefs.setInt('themeColor', next.value);
   });
-  return const Color(0xFFFF1493);
+  return const Color(0xFF0A2463);
 });
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) {

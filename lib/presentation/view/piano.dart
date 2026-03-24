@@ -119,9 +119,6 @@ class _PianoState extends ConsumerState<Piano> {
       final showControls = dimens.maxWidth > 550;
       return Scaffold(
         appBar: AppBar(
-          elevation: 1,
-          shadowColor: Theme.of(context).colorScheme.shadow.withAlpha(40),
-          scrolledUnderElevation: 1,
           leading: const BackButton(),
           title: Text(context.locale.title),
           actions: [

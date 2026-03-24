@@ -14,9 +14,6 @@ class Home extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        elevation: 1,
-        shadowColor: theme.colorScheme.shadow.withAlpha(40),
-        scrolledUnderElevation: 1,
         titleSpacing: 20,
         title: Text(
           'Ruth',

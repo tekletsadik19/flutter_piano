@@ -28,10 +28,18 @@ class Ruth extends ConsumerWidget {
         ),
         scaffoldBackgroundColor: Colors.white,
         textTheme: GoogleFonts.outfitTextTheme(ThemeData.light().textTheme),
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           backgroundColor: Colors.white,
           foregroundColor: Colors.black,
           surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          shape: Border(
+            bottom: BorderSide(
+              color: Colors.black.withAlpha(10),
+              width: 1,
+            ),
+          ),
         ),
       ),
       darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
@@ -42,10 +50,18 @@ class Ruth extends ConsumerWidget {
         ),
         scaffoldBackgroundColor: Colors.black,
         textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           backgroundColor: Colors.black,
           foregroundColor: Colors.white,
           surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          shape: Border(
+            bottom: BorderSide(
+              color: Colors.white.withAlpha(10),
+              width: 1,
+            ),
+          ),
         ),
       ),
       themeMode: mode,
