@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-import 'package:flutter_svg/flutter_svg.dart';
-
 import '../widget/featured_banners.dart';
+import '../widget/quick_access_card.dart';
 import '../../data/source/gamification.dart';
 
 class Home extends ConsumerWidget {
@@ -62,7 +61,7 @@ class Home extends ConsumerWidget {
             if (isWide)
               Row(children: [
                 Expanded(
-                  child: _QuickCard(
+                  child: QuickAccessCard(
                     icon: HugeIcons.strokeRoundedMusicNote01,
                     label: 'Lessons',
                     subtitle: 'Structured learning',
@@ -71,7 +70,7 @@ class Home extends ConsumerWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _QuickCard(
+                  child: QuickAccessCard(
                     icon: HugeIcons.strokeRoundedMusicNote02,
                     label: 'Free Play',
                     subtitle: 'Open the piano',
@@ -81,14 +80,14 @@ class Home extends ConsumerWidget {
               ])
             else
               Column(children: [
-                _QuickCard(
+                QuickAccessCard(
                   icon: HugeIcons.strokeRoundedMusicNote01,
                   label: 'Lessons',
                   subtitle: 'Structured learning',
                   onTap: () => onSwitchTab?.call(1),
                 ),
                 const SizedBox(height: 10),
-                _QuickCard(
+                QuickAccessCard(
                   icon: HugeIcons.strokeRoundedMusicNote02,
                   label: 'Free Play',
                   subtitle: 'Open the piano',
@@ -180,93 +179,6 @@ class _StatChip extends StatelessWidget {
                   color: color,
                 ),
                 overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _QuickCard extends StatelessWidget {
-  const _QuickCard({
-    required this.icon,
-    required this.label,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final List<List<dynamic>> icon;
-  final String label;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Material(
-      color: theme.colorScheme.primary,
-      borderRadius: BorderRadius.circular(16),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: SvgPicture.asset(
-                'assets/images/pattern.svg',
-                fit: BoxFit.cover,
-                colorFilter: ColorFilter.mode(
-                  theme.colorScheme.onPrimary.withAlpha(3),
-                  BlendMode.srcIn,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.onPrimary.withAlpha(20),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: HugeIcon(
-                      icon: icon,
-                      color: theme.colorScheme.onPrimary,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          label,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            color: theme.colorScheme.onPrimary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          subtitle,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onPrimary.withAlpha(200),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedArrowRight01,
-                    color: theme.colorScheme.onPrimary.withAlpha(150),
-                    size: 18,
-                  ),
-                ],
               ),
             ),
           ],
