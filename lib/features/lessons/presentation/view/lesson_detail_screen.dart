@@ -9,7 +9,7 @@ import '../../../../presentation/view/piano.dart';
 import '../../domain/entities/lesson.dart';
 import '../providers/lessons_provider.dart' as progress_saver;
 import '../widget/keyboard_diagram.dart';
-import '../widget/practice_guide.dart';
+import '../widget/lesson_practice_mode.dart';
 
 class LessonDetailScreen extends ConsumerStatefulWidget {
   const LessonDetailScreen({super.key, required this.lesson});
@@ -431,8 +431,8 @@ class _PracticeStep extends StatelessWidget {
                        lesson.content?.highlightedKeys.isNotEmpty == true;
 
     if (hasExercise) {
-      // Show guided practice with exercise data
-      return PracticeGuide(lesson: lesson);
+      // Show real guided practice with embedded piano
+      return LessonPracticeMode(lesson: lesson);
     } else {
       // Show free play mode
       return _FreePracticeMode(lesson: lesson);
