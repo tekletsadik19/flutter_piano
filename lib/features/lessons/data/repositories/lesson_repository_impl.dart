@@ -1620,6 +1620,198 @@ class LessonRepositoryImpl implements LessonRepository {
         youtubeVideoId: _Videos.u2L37V7Chord,
       ),
     ),
+
+    // ════════════════════════════════════════════════════════════════════════
+    // GUIDED PRACTICE LESSONS (linked to exercise data)
+    // ════════════════════════════════════════════════════════════════════════
+
+    // ── Chord lessons with guided practice ────────────────────────────────
+    const LessonModel(
+      id: 'practice-c-major-chord',
+      title: 'Practice: C Major Chord',
+      description: 'Play the C-E-G chord with guided feedback.',
+      level: LessonLevel.beginner,
+      path: LessonPath.chords,
+      durationMinutes: 4,
+      exerciseType: 'chord',
+      exerciseId: 'chord-major-triad-C',
+      content: LessonContent(
+        conceptText:
+            'The C Major chord uses three notes:\n'
+            '• C (root)\n'
+            '• E (major third)\n'
+            '• G (perfect fifth)\n\n'
+            'Play each note in order as shown in the practice guide.',
+        highlightedKeys: [60, 64, 67],
+        keyLabels: {60: 'C', 64: 'E', 67: 'G'},
+      ),
+    ),
+
+    const LessonModel(
+      id: 'practice-g-major-chord',
+      title: 'Practice: G Major Chord',
+      description: 'Play the G-B-D chord with guided feedback.',
+      level: LessonLevel.beginner,
+      path: LessonPath.chords,
+      durationMinutes: 4,
+      exerciseType: 'chord',
+      exerciseId: 'chord-major-triad-G',
+      content: LessonContent(
+        conceptText:
+            'The G Major chord contains:\n'
+            '• G (root)\n'
+            '• B (major third)\n'
+            '• D (perfect fifth)\n\n'
+            'Play each note in order following the guides.',
+        highlightedKeys: [67, 71, 74],
+        keyLabels: {67: 'G', 71: 'B', 74: 'D'},
+      ),
+    ),
+
+    const LessonModel(
+      id: 'practice-a-minor-chord',
+      title: 'Practice: A Minor Chord',
+      description: 'Play the A-C-E chord with guided feedback.',
+      level: LessonLevel.beginner,
+      path: LessonPath.chords,
+      durationMinutes: 4,
+      exerciseType: 'chord',
+      exerciseId: 'chord-minor-triad-A',
+      content: LessonContent(
+        conceptText:
+            'The A Minor chord (the relative minor of C Major):\n'
+            '• A (root)\n'
+            '• C (minor third — flatted)\n'
+            '• E (perfect fifth)\n\n'
+            'Play each note as indicated by the practice guide.',
+        highlightedKeys: [69, 72, 76],
+        keyLabels: {69: 'A', 72: 'C', 76: 'E'},
+      ),
+    ),
+
+    // ── Scale lessons with guided practice ────────────────────────────────
+    const LessonModel(
+      id: 'practice-c-major-scale',
+      title: 'Practice: C Major Scale',
+      description: 'Play all 8 notes of the C Major scale.',
+      level: LessonLevel.beginner,
+      path: LessonPath.soloist,
+      durationMinutes: 5,
+      exerciseType: 'scale',
+      exerciseId: 'scale-major-C',
+      content: LessonContent(
+        conceptText:
+            'The C Major scale (no sharps or flats):\n'
+            'C - D - E - F - G - A - B - C\n\n'
+            'Play each note from left to right, then back down. '
+            'Start slow and build speed with repetition.',
+        highlightedKeys: [48, 50, 52, 53, 55, 57, 59, 60],
+        keyLabels: {
+          48: 'C',
+          50: 'D',
+          52: 'E',
+          53: 'F',
+          55: 'G',
+          57: 'A',
+          59: 'B',
+          60: 'C',
+        },
+      ),
+    ),
+
+    const LessonModel(
+      id: 'practice-g-major-scale',
+      title: 'Practice: G Major Scale',
+      description: 'Play all 8 notes of the G Major scale (with F#).',
+      level: LessonLevel.beginner,
+      path: LessonPath.soloist,
+      durationMinutes: 5,
+      exerciseType: 'scale',
+      exerciseId: 'scale-major-G',
+      content: LessonContent(
+        conceptText:
+            'The G Major scale (one sharp: F#):\n'
+            'G - A - B - C - D - E - F# - G\n\n'
+            'Remember: the F in this scale is F#, not natural F.',
+        highlightedKeys: [55, 57, 59, 60, 62, 64, 66, 67],
+        keyLabels: {
+          55: 'G',
+          57: 'A',
+          59: 'B',
+          60: 'C',
+          62: 'D',
+          64: 'E',
+          66: 'F#',
+          67: 'G',
+        },
+      ),
+    ),
+
+    const LessonModel(
+      id: 'practice-d-major-scale',
+      title: 'Practice: D Major Scale',
+      description: 'Play the D Major scale (with F# and C#).',
+      level: LessonLevel.beginner,
+      path: LessonPath.soloist,
+      durationMinutes: 5,
+      exerciseType: 'scale',
+      exerciseId: 'scale-major-D',
+      content: LessonContent(
+        conceptText:
+            'The D Major scale (two sharps: F# and C#):\n'
+            'D - E - F# - G - A - B - C# - D\n\n'
+            'This scale is bright and often used in folk and classical music.',
+        highlightedKeys: [50, 52, 54, 55, 57, 59, 61, 62],
+        keyLabels: {
+          50: 'D',
+          52: 'E',
+          54: 'F#',
+          55: 'G',
+          57: 'A',
+          59: 'B',
+          61: 'C#',
+          62: 'D',
+        },
+      ),
+    ),
+
+    // ── Arpeggio lessons with guided practice ────────────────────────────
+    const LessonModel(
+      id: 'practice-c-major-arpeggio',
+      title: 'Practice: C Major Arpeggio',
+      description: 'Play the C Major chord as a flowing arpeggio.',
+      level: LessonLevel.beginner,
+      path: LessonPath.soloist,
+      durationMinutes: 5,
+      exerciseType: 'arpeggio',
+      exerciseId: 'arpeggio-major-asc-C',
+      content: LessonContent(
+        conceptText:
+            'An arpeggio breaks up a chord into separate flowing notes.\n\n'
+            'C Major arpeggio: C - E - G - C (next octave)\n\n'
+            'This creates a cascading, musical sound and develops finger technique.',
+        highlightedKeys: [48, 52, 55, 60],
+        keyLabels: {48: 'C', 52: 'E', 55: 'G', 60: 'C'},
+      ),
+    ),
+
+    const LessonModel(
+      id: 'practice-g-major-arpeggio',
+      title: 'Practice: G Major Arpeggio',
+      description: 'Play the G Major chord as an arpeggio.',
+      level: LessonLevel.beginner,
+      path: LessonPath.soloist,
+      durationMinutes: 5,
+      exerciseType: 'arpeggio',
+      exerciseId: 'arpeggio-major-asc-G',
+      content: LessonContent(
+        conceptText:
+            'G Major arpeggio: G - B - D - G (next octave)\n\n'
+            'Focus on smooth, even spacing between each note.',
+        highlightedKeys: [55, 59, 62, 67],
+        keyLabels: {55: 'G', 59: 'B', 62: 'D', 67: 'G'},
+      ),
+    ),
   ];
 
   // ─────────────────────────────────────────────────────────────────────────
