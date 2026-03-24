@@ -4,7 +4,6 @@ import 'package:recase/recase.dart';
 
 import '../../data/source/settings.dart';
 import '../view/app.dart';
-import '../widget/color_picker.dart';
 import '../widget/color_role.dart';
 import '../widget/locale.dart';
 import '../widget/piano_key.dart';
@@ -51,8 +50,6 @@ class ProfileScreen extends ConsumerWidget {
                   title: 'Appearance',
                   children: [
                     _ThemeBrightnessRow(),
-                    _Divider(),
-                    _ThemeColorRow(),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -257,21 +254,6 @@ class _ThemeBrightnessRow extends ConsumerWidget {
                 ref.read(themeModeProvider.notifier).state = v.first,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ThemeColorRow extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final color = ref.watch(themeColorProvider);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-      child: ColorPicker(
-        color: color,
-        onColorChanged: (v) => ref.read(themeColorProvider.notifier).state = v,
-        label: context.locale.themeColor,
       ),
     );
   }

@@ -18,14 +18,13 @@ class Ruth extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(loadSettings);
     ref.watch(loadGamification);
-    final color = ref.watch(themeColorProvider);
     final mode = ref.watch(themeModeProvider);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Lumina Piano',
       theme: ThemeData.light(useMaterial3: true).copyWith(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: color,
+          seedColor: const Color(0xFFFF4081),
           brightness: Brightness.light,
           surface: Colors.white,
         ),
@@ -47,7 +46,7 @@ class Ruth extends ConsumerWidget {
       ),
       darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: color,
+          seedColor: const Color(0xFFFF4081),
           brightness: Brightness.dark,
           surface: Colors.black,
         ),
