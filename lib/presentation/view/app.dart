@@ -22,7 +22,7 @@ class Ruth extends ConsumerWidget {
     final mode = ref.watch(themeModeProvider);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Ruth',
+      title: 'Lumina Piano',
       theme: ThemeData.light(useMaterial3: true).copyWith(
         colorScheme: ColorScheme.fromSeed(
           seedColor: color,

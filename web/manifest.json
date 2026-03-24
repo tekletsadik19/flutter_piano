@@ -1,6 +1,6 @@
 {
-  "name": "The Pocket Piano",
-  "short_name": "Pocket Piano",
+  "name": "Lumina Piano",
+  "short_name": "Lumina",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#000000",

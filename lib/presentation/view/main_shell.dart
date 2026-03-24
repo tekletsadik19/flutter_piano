@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:remixicon/remixicon.dart';
 
 import '../../features/lessons/presentation/view/lessons_screen.dart';
 import '../../features/progress/presentation/view/progress_screen.dart';
@@ -29,10 +30,7 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: _BottomNav(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
@@ -66,10 +64,7 @@ class _BottomNav extends StatelessWidget {
                   : const Color(0xFFFFFFFF).withAlpha(178),
               borderRadius: BorderRadius.circular(100),
               boxShadow: [
-                BoxShadow(
-                  blurRadius: 24,
-                  color: Colors.black.withAlpha(13),
-                ),
+                BoxShadow(blurRadius: 24, color: Colors.black.withAlpha(13)),
               ],
             ),
             child: Row(
@@ -85,24 +80,21 @@ class _BottomNav extends StatelessWidget {
                 ),
                 _NavItem(
                   label: 'Lessons',
-                  activeIcon: HugeIcons.strokeRoundedMusicNote01,
-                  inactiveIcon: HugeIcons.strokeRoundedMusicNote01,
+                  iconData: Remix.music_2_line,
                   index: 1,
                   currentIndex: currentIndex,
                   onTap: onTap,
                 ),
                 _NavItem(
                   label: 'Piano',
-                  activeIcon: HugeIcons.strokeRoundedMusicNote02,
-                  inactiveIcon: HugeIcons.strokeRoundedMusicNote02,
+                  iconData: Remix.keyboard_line,
                   index: 2,
                   currentIndex: currentIndex,
                   onTap: onTap,
                 ),
                 _NavItem(
                   label: 'Progress',
-                  activeIcon: HugeIcons.strokeRoundedChartLineData01,
-                  inactiveIcon: HugeIcons.strokeRoundedChartLineData01,
+                  iconData: Remix.bar_chart_box_line,
                   index: 3,
                   currentIndex: currentIndex,
                   onTap: onTap,
@@ -119,16 +111,18 @@ class _BottomNav extends StatelessWidget {
 class _NavItem extends StatelessWidget {
   const _NavItem({
     required this.label,
-    required this.activeIcon,
-    required this.inactiveIcon,
+    this.activeIcon,
+    this.inactiveIcon,
+    this.iconData,
     required this.index,
     required this.currentIndex,
     required this.onTap,
   });
 
   final String label;
-  final List<List<dynamic>> activeIcon;
-  final List<List<dynamic>> inactiveIcon;
+  final List<List<dynamic>>? activeIcon;
+  final List<List<dynamic>>? inactiveIcon;
+  final IconData? iconData;
   final int index;
   final int currentIndex;
   final void Function(int) onTap;
@@ -147,21 +141,29 @@ class _NavItem extends StatelessWidget {
           children: [
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
-              child: HugeIcon(
-                key: ValueKey(isSelected),
-                icon: isSelected ? activeIcon : inactiveIcon,
-                size: 24,
-                color: isSelected
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurface.withAlpha(153),
-              ),
+              child: iconData != null
+                  ? Icon(
+                      iconData,
+                      key: ValueKey('icon_$isSelected'),
+                      size: 24,
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface.withAlpha(153),
+                    )
+                  : HugeIcon(
+                      key: ValueKey(isSelected),
+                      icon: isSelected ? activeIcon! : inactiveIcon!,
+                      size: 24,
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface.withAlpha(153),
+                    ),
             ),
             const SizedBox(height: 4),
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 200),
               style: theme.textTheme.labelSmall!.copyWith(
-                fontWeight:
-                    isSelected ? FontWeight.w600 : FontWeight.w500,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 color: isSelected
                     ? theme.colorScheme.primary
                     : theme.colorScheme.onSurface.withAlpha(153),
