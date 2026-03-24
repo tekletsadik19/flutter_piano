@@ -21,9 +21,7 @@ class LessonsScreen extends ConsumerWidget {
         automaticallyImplyLeading: false,
         title: Text(
           'Lessons',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+         
         ),
       ),
       body: lessonsAsync.when(
@@ -35,46 +33,180 @@ class LessonsScreen extends ConsumerWidget {
   }
 }
 
-class _LessonsBody extends StatelessWidget {
-  const _LessonsBody({required this.lessons});
-  final List<Lesson> lessons;
+class _SearchBar extends StatefulWidget {
+  const _SearchBar({required this.onSearch});
+  final void Function(String) onSearch;
+
+  @override
+  State<_SearchBar> createState() => _SearchBarState();
+}
+
+class _SearchBarState extends State<_SearchBar> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+    _controller.addListener(() => widget.onSearch(_controller.text));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final beginner = lessons.where((l) => l.level == LessonLevel.beginner).toList();
-    final intermediate = lessons.where((l) => l.level == LessonLevel.intermediate).toList();
-    final advanced = lessons.where((l) => l.level == LessonLevel.advanced).toList();
-    final totalDone = lessons.where((l) => l.isCompleted).length;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      child: TextField(
+        controller: _controller,
+        decoration: InputDecoration(
+          hintText: 'Search lessons...',
+          hintStyle: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          prefixIcon: HugeIcon(
+            icon: HugeIcons.strokeRoundedSearch01,
+            color: theme.colorScheme.onSurfaceVariant,
+            size: 20,
+          ),
+          suffixIcon: _controller.text.isNotEmpty
+              ? GestureDetector(
+                  onTap: () {
+                    _controller.clear();
+                    FocusScope.of(context).unfocus();
+                  },
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedCancel01,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    size: 20,
+                  ),
+                )
+              : null,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: theme.colorScheme.outline),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: theme.colorScheme.outline.withAlpha(60)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: theme.colorScheme.primary),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LessonsBody extends StatefulWidget {
+  const _LessonsBody({required this.lessons});
+  final List<Lesson> lessons;
+
+  @override
+  State<_LessonsBody> createState() => _LessonsBodyState();
+}
+
+class _LessonsBodyState extends State<_LessonsBody> {
+  String _searchQuery = '';
+
+  List<Lesson> _filterLessons(List<Lesson> lessons) {
+    if (_searchQuery.isEmpty) return lessons;
+    return lessons
+        .where((l) =>
+            l.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            l.description.toLowerCase().contains(_searchQuery.toLowerCase()))
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final filtered = _filterLessons(widget.lessons);
+    final beginner = filtered.where((l) => l.level == LessonLevel.beginner).toList();
+    final intermediate = filtered.where((l) => l.level == LessonLevel.intermediate).toList();
+    final advanced = filtered.where((l) => l.level == LessonLevel.advanced).toList();
+    final totalDone = widget.lessons.where((l) => l.isCompleted).length;
+    final hasResults = beginner.isNotEmpty || intermediate.isNotEmpty || advanced.isNotEmpty;
 
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-            child: _ProgressSummary(
-              theme: theme,
-              done: totalDone,
-              total: lessons.length,
-            ),
+          child: _SearchBar(
+            onSearch: (query) => setState(() => _searchQuery = query),
           ),
         ),
-        _LevelSection(
-          title: 'Beginner',
-          icon: HugeIcons.strokeRoundedMusicNote01,
-          lessons: beginner,
-        ),
-        _LevelSection(
-          title: 'Intermediate',
-          icon: HugeIcons.strokeRoundedMusicNote02,
-          lessons: intermediate,
-        ),
-        _LevelSection(
-          title: 'Advanced',
-          icon: HugeIcons.strokeRoundedMusicNote03,
-          lessons: advanced,
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: 32)),
+        if (_searchQuery.isEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+              child: _ProgressSummary(
+                theme: theme,
+                done: totalDone,
+                total: widget.lessons.length,
+              ),
+            ),
+          ),
+        if (!hasResults && _searchQuery.isNotEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedSearch01,
+                    size: 48,
+                    color: theme.colorScheme.onSurfaceVariant.withAlpha(100),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No lessons found',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Try searching for a different term',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          )
+        else ...[
+          if (beginner.isNotEmpty)
+            _LevelSection(
+              title: 'Beginner',
+              icon: HugeIcons.strokeRoundedMusicNote01,
+              lessons: beginner,
+            ),
+          if (intermediate.isNotEmpty)
+            _LevelSection(
+              title: 'Intermediate',
+              icon: HugeIcons.strokeRoundedMusicNote02,
+              lessons: intermediate,
+            ),
+          if (advanced.isNotEmpty)
+            _LevelSection(
+              title: 'Advanced',
+              icon: HugeIcons.strokeRoundedMusicNote03,
+              lessons: advanced,
+            ),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
+        ],
       ],
     );
   }
