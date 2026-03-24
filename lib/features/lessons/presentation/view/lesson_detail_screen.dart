@@ -12,6 +12,7 @@ import '../../../../presentation/widget/piano_view.dart';
 import '../../domain/entities/lesson.dart';
 import '../providers/lessons_provider.dart' as progress_saver;
 import '../widget/keyboard_diagram.dart';
+import '../widget/lesson_content_viewer.dart';
 
 class LessonDetailScreen extends ConsumerStatefulWidget {
   const LessonDetailScreen({super.key, required this.lesson});
@@ -198,80 +199,38 @@ class _ConceptStep extends StatelessWidget {
     final c = lesson.content;
     final hasKeys = c?.highlightedKeys.isNotEmpty ?? false;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Keyboard diagram ──────────────────────────────────────────────
-          if (hasKeys) ...[
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Keys to press',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      letterSpacing: 1.2,
-                      fontWeight: FontWeight.w600,
-                    ),
+    return Column(
+      children: [
+        // ── Quick reference ────────────────────────────────────────────────
+        if (hasKeys)
+          Container(
+            color: theme.colorScheme.surfaceContainer,
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Keys to press',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    letterSpacing: 1.2,
+                    fontWeight: FontWeight.w600,
                   ),
-                  const SizedBox(height: 12),
-                  KeyboardDiagram(
-                    highlightedKeys: c!.highlightedKeys,
-                    keyLabels: c.keyLabels,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
-          // ── Supplemental diagram image ────────────────────────────────────
-          if (c?.diagramUrl != null) ...[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                width: double.infinity,
-                color: Colors.white,
-                padding: const EdgeInsets.all(16),
-                child: _DiagramImage(url: c!.diagramUrl!),
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
-          // ── Text ──────────────────────────────────────────────────────────
-          Text(
-            'Concept',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.primary,
-              letterSpacing: 1.5,
-              fontWeight: FontWeight.w600,
+                ),
+                const SizedBox(height: 12),
+                KeyboardDiagram(
+                  highlightedKeys: c!.highlightedKeys,
+                  keyLabels: c.keyLabels,
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            lesson.title,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-          if (c?.conceptText != null)
-            Text(
-              c!.conceptText!,
-              style: theme.textTheme.bodyMedium?.copyWith(height: 1.7),
-            ),
-          const SizedBox(height: 20),
-          _MetaRow(lesson: lesson),
-        ],
-      ),
+
+        // ── Comprehensive content viewer ───────────────────────────────────
+        Expanded(
+          child: LessonContentViewer(lesson: lesson),
+        ),
+      ],
     );
   }
 }
