@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../data/source/settings.dart';
 import '../../l10n/app_localizations.dart';
-import 'home.dart';
+import 'main_shell.dart';
 
 final localeProvider = StateProvider<Locale?>(
   (ref) => null,
@@ -68,7 +68,7 @@ class Ruth extends ConsumerWidget {
       locale: ref.watch(localeProvider),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const Home(),
+      home: const MainShell(),
     );
   }
 }

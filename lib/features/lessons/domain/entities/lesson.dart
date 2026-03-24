@@ -6,18 +6,23 @@ class LessonContent {
   const LessonContent({
     this.conceptText,
     this.diagramUrl,
-    this.audioUrl,
+    this.highlightedKeys = const [],
+    this.keyLabels = const {},
     this.youtubeVideoId,
   });
 
   /// Short explanation shown on the concept step
   final String? conceptText;
 
-  /// Wikimedia SVG or PNG image URL
+  /// Wikimedia SVG or PNG image URL (optional supplemental diagram)
   final String? diagramUrl;
 
-  /// Musopen / mfiles MP3 URL for the demo listen step
-  final String? audioUrl;
+  /// MIDI note numbers (21–108) to highlight on the keyboard diagram.
+  /// e.g. [60, 64, 67] = C major chord (C4, E4, G4)
+  final List<int> highlightedKeys;
+
+  /// Optional note name labels for specific keys: {60: 'C', 64: 'E', 67: 'G'}
+  final Map<int, String> keyLabels;
 
   /// YouTube video ID for the watch step (Hoffman Academy etc.)
   final String? youtubeVideoId;

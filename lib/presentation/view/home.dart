@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-import '../../features/lessons/presentation/view/lessons_screen.dart';
-import 'piano.dart';
 
 class Home extends StatelessWidget {
-  const Home({super.key});
+  const Home({super.key, this.onSwitchTab});
+
+  final void Function(int)? onSwitchTab;
 
   @override
   Widget build(BuildContext context) {
@@ -15,12 +15,6 @@ class Home extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 20,
-        title: Text(
-          'Ruth',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
         actions: [
           IconButton(
             icon: HugeIcon(
@@ -39,7 +33,7 @@ class Home extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
-            _FeaturedBanner(theme: theme),
+            _FeaturedBanner(theme: theme, onTap: () => onSwitchTab?.call(1)),
             const SizedBox(height: 24),
             Text(
               'QUICK ACCESS',
@@ -57,7 +51,7 @@ class Home extends StatelessWidget {
                     icon: HugeIcons.strokeRoundedMusicNote01,
                     label: 'Lessons',
                     subtitle: 'Structured learning',
-                    onTap: () => _push(context, const LessonsScreen()),
+                    onTap: () => onSwitchTab?.call(1),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -66,7 +60,7 @@ class Home extends StatelessWidget {
                     icon: HugeIcons.strokeRoundedMusicNote02,
                     label: 'Free Play',
                     subtitle: 'Open the piano',
-                    onTap: () => _push(context, const Piano()),
+                    onTap: () => onSwitchTab?.call(2),
                   ),
                 ),
               ])
@@ -76,14 +70,14 @@ class Home extends StatelessWidget {
                   icon: HugeIcons.strokeRoundedMusicNote01,
                   label: 'Lessons',
                   subtitle: 'Structured learning',
-                  onTap: () => _push(context, const LessonsScreen()),
+                  onTap: () => onSwitchTab?.call(1),
                 ),
                 const SizedBox(height: 10),
                 _QuickCard(
                   icon: HugeIcons.strokeRoundedMusicNote02,
                   label: 'Free Play',
                   subtitle: 'Open the piano',
-                  onTap: () => _push(context, const Piano()),
+                  onTap: () => onSwitchTab?.call(2),
                 ),
               ]),
             const SizedBox(height: 24),
@@ -92,15 +86,12 @@ class Home extends StatelessWidget {
       ),
     );
   }
-
-  void _push(BuildContext context, Widget screen) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
-  }
 }
 
 class _FeaturedBanner extends StatelessWidget {
-  const _FeaturedBanner({required this.theme});
+  const _FeaturedBanner({required this.theme, required this.onTap});
   final ThemeData theme;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -146,9 +137,7 @@ class _FeaturedBanner extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const LessonsScreen()),
-                  ),
+                  onPressed: onTap,
                   child: const Text('Browse Lessons'),
                 ),
               ],

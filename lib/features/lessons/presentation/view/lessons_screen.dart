@@ -17,8 +17,8 @@ class LessonsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: 0,
-        leading: const BackButton(),
+        titleSpacing: 20,
+        automaticallyImplyLeading: false,
         title: Text(
           'Lessons',
           style: theme.textTheme.titleLarge?.copyWith(

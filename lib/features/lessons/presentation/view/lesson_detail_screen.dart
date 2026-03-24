@@ -1,4 +1,3 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -7,6 +6,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../../../presentation/view/piano.dart';
 import '../../domain/entities/lesson.dart';
+import '../widget/keyboard_diagram.dart';
 
 class LessonDetailScreen extends StatefulWidget {
   const LessonDetailScreen({super.key, required this.lesson});
@@ -18,19 +18,13 @@ class LessonDetailScreen extends StatefulWidget {
 
 class _LessonDetailScreenState extends State<LessonDetailScreen> {
   int _step = 0;
-  final _audioPlayer = AudioPlayer();
-  bool _audioPlaying = false;
-  Duration _audioDuration = Duration.zero;
-  Duration _audioPosition = Duration.zero;
   YoutubePlayerController? _ytController;
 
   List<_Step> get _steps {
     final c = widget.lesson.content;
     return [
-      if (c?.conceptText != null || c?.diagramUrl != null)
+      if (c?.conceptText != null || c?.diagramUrl != null || (c?.highlightedKeys.isNotEmpty ?? false))
         _Step.concept,
-      if (c?.audioUrl != null)
-        _Step.listen,
       if (c?.youtubeVideoId != null)
         _Step.watch,
       _Step.practice,
@@ -47,37 +41,12 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
         flags: const YoutubePlayerFlags(autoPlay: false, mute: false),
       );
     }
-    _audioPlayer.onDurationChanged.listen((d) {
-      if (mounted) setState(() => _audioDuration = d);
-    });
-    _audioPlayer.onPositionChanged.listen((p) {
-      if (mounted) setState(() => _audioPosition = p);
-    });
-    _audioPlayer.onPlayerComplete.listen((_) {
-      if (mounted) setState(() => _audioPlaying = false);
-    });
   }
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
     _ytController?.dispose();
     super.dispose();
-  }
-
-  Future<void> _toggleAudio() async {
-    final url = widget.lesson.content?.audioUrl;
-    if (url == null) return;
-    if (_audioPlaying) {
-      await _audioPlayer.pause();
-    } else {
-      if (_audioPosition == Duration.zero) {
-        await _audioPlayer.play(UrlSource(url));
-      } else {
-        await _audioPlayer.resume();
-      }
-    }
-    setState(() => _audioPlaying = !_audioPlaying);
   }
 
   void _next() {
@@ -132,21 +101,8 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
               child: KeyedSubtree(
                 key: ValueKey(_step),
                 child: switch (current) {
-                  _Step.concept => _ConceptStep(lesson: widget.lesson),
-                  _Step.listen  => _ListenStep(
-                      lesson: widget.lesson,
-                      isPlaying: _audioPlaying,
-                      duration: _audioDuration,
-                      position: _audioPosition,
-                      onToggle: _toggleAudio,
-                      onSeek: (v) => _audioPlayer.seek(
-                        Duration(
-                          milliseconds:
-                              (v * _audioDuration.inMilliseconds).toInt(),
-                        ),
-                      ),
-                    ),
-                  _Step.watch   => _WatchStep(controller: _ytController!),
+                  _Step.concept  => _ConceptStep(lesson: widget.lesson),
+                  _Step.watch    => _WatchStep(controller: _ytController!),
                   _Step.practice => _PracticeStep(lesson: widget.lesson),
                 },
               ),
@@ -168,7 +124,7 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
 
 // ── Steps enum ────────────────────────────────────────────────────────────────
 
-enum _Step { concept, listen, watch, practice }
+enum _Step { concept, watch, practice }
 
 // ── Step indicator ────────────────────────────────────────────────────────────
 
@@ -208,12 +164,44 @@ class _ConceptStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final c = lesson.content;
+    final hasKeys = c?.highlightedKeys.isNotEmpty ?? false;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Keyboard diagram ──────────────────────────────────────────────
+          if (hasKeys) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Keys to press',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  KeyboardDiagram(
+                    highlightedKeys: c!.highlightedKeys,
+                    keyLabels: c.keyLabels,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+          // ── Supplemental diagram image ────────────────────────────────────
           if (c?.diagramUrl != null) ...[
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
@@ -226,6 +214,7 @@ class _ConceptStep extends StatelessWidget {
             ),
             const SizedBox(height: 20),
           ],
+          // ── Text ──────────────────────────────────────────────────────────
           Text(
             'Concept',
             style: theme.textTheme.labelSmall?.copyWith(
@@ -341,139 +330,6 @@ class _Chip extends StatelessWidget {
           HugeIcon(icon: icon, size: 13, color: theme.colorScheme.primary),
           const SizedBox(width: 5),
           Text(label, style: theme.textTheme.labelSmall),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Listen step ───────────────────────────────────────────────────────────────
-
-class _ListenStep extends StatelessWidget {
-  const _ListenStep({
-    required this.lesson,
-    required this.isPlaying,
-    required this.duration,
-    required this.position,
-    required this.onToggle,
-    required this.onSeek,
-  });
-
-  final Lesson lesson;
-  final bool isPlaying;
-  final Duration duration;
-  final Duration position;
-  final VoidCallback onToggle;
-  final ValueChanged<double> onSeek;
-
-  String _fmt(Duration d) {
-    final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$m:$s';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final progress = duration.inMilliseconds > 0
-        ? position.inMilliseconds / duration.inMilliseconds
-        : 0.0;
-
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'LISTEN',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.primary,
-              letterSpacing: 1.5,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Hear it first',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Listen to the demo before you play. Build the sound in your head.',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              height: 1.5,
-            ),
-          ),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    onPressed: onToggle,
-                    icon: HugeIcon(
-                      icon: isPlaying
-                          ? HugeIcons.strokeRoundedPause
-                          : HugeIcons.strokeRoundedPlay,
-                      color: theme.colorScheme.onPrimary,
-                      size: 32,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  lesson.title,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SliderTheme(
-                  data: SliderTheme.of(context).copyWith(
-                    trackHeight: 4,
-                    thumbShape: const RoundSliderThumbShape(
-                      enabledThumbRadius: 6,
-                    ),
-                  ),
-                  child: Slider(
-                    value: progress.clamp(0.0, 1.0),
-                    onChanged: onSeek,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(_fmt(position),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          )),
-                      Text(_fmt(duration),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          )),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Spacer(),
         ],
       ),
     );
