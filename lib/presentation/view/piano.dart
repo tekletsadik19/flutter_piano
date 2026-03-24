@@ -6,7 +6,6 @@ import '../../data/source/player/player.dart';
 import '../../data/source/settings.dart';
 import '../widget/locale.dart';
 import '../widget/piano_view.dart';
-import '../widget/settings.dart';
 
 class Piano extends ConsumerStatefulWidget {
   const Piano({super.key});
@@ -164,17 +163,6 @@ class _PianoState extends ConsumerState<Piano> {
                 tooltip: context.locale.splitKeyboard,
               ),
             ],
-            Builder(builder: (context) {
-              return IconButton(
-                onPressed: () {
-                  showBottomSheet(
-                    context: context,
-                    builder: (context) => const Settings(),
-                  );
-                },
-                icon: const Icon(Icons.settings),
-              );
-            }),
           ],
         ),
         body: Focus(

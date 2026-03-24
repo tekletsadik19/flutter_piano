@@ -65,7 +65,10 @@ class PianoSlider extends ConsumerWidget {
                 left: 0,
                 width: relativeOffset,
                 child: Container(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.6),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .outline
+                      .withValues(alpha: 0.6),
                 ),
               ),
               Positioned(
@@ -74,7 +77,10 @@ class PianoSlider extends ConsumerWidget {
                 left: relativeOffset + relativeViewWidth,
                 right: 0,
                 child: Container(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.6),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .outline
+                      .withValues(alpha: 0.6),
                 ),
               ),
               Positioned(

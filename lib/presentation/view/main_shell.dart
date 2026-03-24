@@ -8,6 +8,7 @@ import '../../features/lessons/presentation/view/lessons_screen.dart';
 import '../../features/progress/presentation/view/progress_screen.dart';
 import 'home.dart';
 import 'piano.dart';
+import 'profile_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -20,11 +21,12 @@ class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
   List<Widget> get _screens => [
-    Home(onSwitchTab: (i) => setState(() => _currentIndex = i)),
-    const LessonsScreen(),
-    const Piano(),
-    const ProgressScreen(),
-  ];
+        Home(onSwitchTab: (i) => setState(() => _currentIndex = i)),
+        const LessonsScreen(),
+        const Piano(),
+        const ProgressScreen(),
+        const ProfileScreen(),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -60,8 +62,8 @@ class _BottomNav extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
             decoration: BoxDecoration(
               color: isDark
-                  ? const Color(0xFF2C2C2C).withAlpha(178)
-                  : const Color(0xFFFFFFFF).withAlpha(178),
+                  ? const Color(0xFF2C2C2C).withAlpha(225)
+                  : const Color(0xFFFFFFFF).withAlpha(225),
               borderRadius: BorderRadius.circular(100),
               boxShadow: [
                 BoxShadow(blurRadius: 24, color: Colors.black.withAlpha(13)),
@@ -96,6 +98,13 @@ class _BottomNav extends StatelessWidget {
                   label: 'Progress',
                   iconData: Remix.bar_chart_box_line,
                   index: 3,
+                  currentIndex: currentIndex,
+                  onTap: onTap,
+                ),
+                _NavItem(
+                  label: 'Profile',
+                  iconData: Remix.account_circle_line,
+                  index: 4,
                   currentIndex: currentIndex,
                   onTap: onTap,
                 ),
@@ -148,7 +157,7 @@ class _NavItem extends StatelessWidget {
                       size: 24,
                       color: isSelected
                           ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurface.withAlpha(153),
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     )
                   : HugeIcon(
                       key: ValueKey(isSelected),
@@ -156,7 +165,7 @@ class _NavItem extends StatelessWidget {
                       size: 24,
                       color: isSelected
                           ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurface.withAlpha(153),
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
             ),
             const SizedBox(height: 4),

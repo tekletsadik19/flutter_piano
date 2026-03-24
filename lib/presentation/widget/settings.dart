@@ -13,7 +13,9 @@ import 'piano_key.dart';
 import 'piano_section.dart';
 
 class Settings extends StatefulWidget {
-  const Settings({super.key});
+  const Settings({super.key, this.shrinkWrap = false});
+
+  final bool shrinkWrap;
 
   @override
   State<Settings> createState() => _SettingsState();
@@ -23,6 +25,8 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return ListView(
+      shrinkWrap: widget.shrinkWrap,
+      physics: widget.shrinkWrap ? const NeverScrollableScrollPhysics() : null,
       children: [
         ExpansionTile(
           title: Text(context.locale.themeBrightness),
@@ -177,7 +181,7 @@ class _SettingsState extends State<Settings> {
               Container(
                 width: double.infinity,
                 height: 300,
-                color: Theme.of(context).colorScheme.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: IgnorePointer(

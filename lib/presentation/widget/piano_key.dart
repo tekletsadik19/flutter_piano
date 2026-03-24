@@ -113,7 +113,7 @@ class _PianoKeyState extends ConsumerState<PianoKey>
         child: Material(
           elevation: _animationTween.value,
           borderRadius: borderRadius,
-          color: bgColor.withOpacity(_opacityTween.value),
+          color: bgColor.withValues(alpha: _opacityTween.value),
           child: pianoKey,
         ),
       ));
@@ -124,7 +124,7 @@ class _PianoKeyState extends ConsumerState<PianoKey>
         child: Material(
           elevation: _animationTween.value,
           borderRadius: borderRadius,
-          color: bgColor.withOpacity(_opacityTween.value),
+          color: bgColor.withValues(alpha: _opacityTween.value),
           child: pianoKey,
         ),
       ));
