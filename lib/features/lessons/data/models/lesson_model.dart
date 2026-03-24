@@ -9,6 +9,8 @@ class LessonModel extends Lesson {
     required super.path,
     required super.durationMinutes,
     super.content,
+    super.exerciseType,
+    super.exerciseId,
     super.starRating = 0,
     super.isCompleted = false,
   });
@@ -25,6 +27,8 @@ class LessonModel extends Lesson {
       path: path,
       durationMinutes: durationMinutes,
       content: content,
+      exerciseType: exerciseType,
+      exerciseId: exerciseId,
       starRating: starRating,
       isCompleted: isCompleted,
     );

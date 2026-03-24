@@ -9,6 +9,7 @@ import '../../../../presentation/view/piano.dart';
 import '../../domain/entities/lesson.dart';
 import '../providers/lessons_provider.dart' as progress_saver;
 import '../widget/keyboard_diagram.dart';
+import '../widget/practice_guide.dart';
 
 class LessonDetailScreen extends ConsumerStatefulWidget {
   const LessonDetailScreen({super.key, required this.lesson});
@@ -422,6 +423,25 @@ class _WatchStep extends StatelessWidget {
 
 class _PracticeStep extends StatelessWidget {
   const _PracticeStep({required this.lesson});
+  final Lesson lesson;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasExercise = lesson.exerciseId != null &&
+                       lesson.content?.highlightedKeys.isNotEmpty == true;
+
+    if (hasExercise) {
+      // Show guided practice with exercise data
+      return PracticeGuide(lesson: lesson);
+    } else {
+      // Show free play mode
+      return _FreePracticeMode(lesson: lesson);
+    }
+  }
+}
+
+class _FreePracticeMode extends StatelessWidget {
+  const _FreePracticeMode({required this.lesson});
   final Lesson lesson;
 
   @override

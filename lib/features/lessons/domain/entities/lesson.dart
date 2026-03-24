@@ -37,6 +37,8 @@ class Lesson {
     required this.path,
     required this.durationMinutes,
     this.content,
+    this.exerciseType,
+    this.exerciseId,
     this.starRating = 0,
     this.isCompleted = false,
   });
@@ -48,6 +50,8 @@ class Lesson {
   final LessonPath path;
   final int durationMinutes;
   final LessonContent? content;
+  final String? exerciseType; // 'scale', 'chord', 'arpeggio'
+  final String? exerciseId; // ID from exercise data (e.g., 'scale-major-C')
   final int starRating; // 0–3
   final bool isCompleted;
 
@@ -63,6 +67,8 @@ class Lesson {
       path: path,
       durationMinutes: durationMinutes,
       content: content,
+      exerciseType: exerciseType,
+      exerciseId: exerciseId,
       starRating: starRating ?? this.starRating,
       isCompleted: isCompleted ?? this.isCompleted,
     );
