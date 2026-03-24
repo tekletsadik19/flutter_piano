@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../features/lessons/presentation/view/lessons_screen.dart';
+import '../../features/progress/presentation/view/progress_screen.dart';
 import 'home.dart';
 import 'piano.dart';
 
@@ -21,6 +22,7 @@ class _MainShellState extends State<MainShell> {
     Home(onSwitchTab: (i) => setState(() => _currentIndex = i)),
     const LessonsScreen(),
     const Piano(),
+    const ProgressScreen(),
   ];
 
   @override
@@ -94,6 +96,14 @@ class _BottomNav extends StatelessWidget {
                   activeIcon: HugeIcons.strokeRoundedMusicNote02,
                   inactiveIcon: HugeIcons.strokeRoundedMusicNote02,
                   index: 2,
+                  currentIndex: currentIndex,
+                  onTap: onTap,
+                ),
+                _NavItem(
+                  label: 'Progress',
+                  activeIcon: HugeIcons.strokeRoundedChartLineData01,
+                  inactiveIcon: HugeIcons.strokeRoundedChartLineData01,
+                  index: 3,
                   currentIndex: currentIndex,
                   onTap: onTap,
                 ),

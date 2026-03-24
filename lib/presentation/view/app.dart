@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../data/source/gamification.dart';
 import '../../data/source/settings.dart';
 import '../../l10n/app_localizations.dart';
 import 'main_shell.dart';
@@ -15,6 +16,8 @@ class Ruth extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(loadSettings);
+    ref.watch(loadGamification);
     final color = ref.watch(themeColorProvider);
     final mode = ref.watch(themeModeProvider);
     return MaterialApp(

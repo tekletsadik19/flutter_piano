@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../data/source/gamification.dart';
 import '../../../../data/source/settings.dart';
 import '../../data/repositories/lesson_repository_impl.dart';
 import '../../domain/entities/lesson.dart';
@@ -21,3 +22,16 @@ final lessonsByLevelProvider = FutureProvider.family<List<Lesson>, LessonLevel>(
     return lessons.where((l) => l.level == level).toList();
   },
 );
+
+/// Saves progress for a lesson and invalidates the lessons cache so the list
+/// and lesson cards reflect the updated stars/completion immediately.
+Future<void> saveProgress(
+  WidgetRef ref,
+  String lessonId, {
+  required int starRating,
+}) async {
+  final repo = await ref.read(lessonRepositoryProvider.future);
+  repo.saveProgress(lessonId, starRating: starRating, isCompleted: true);
+  ref.invalidate(lessonsProvider);
+  await recordPracticeSession(ref, stars: starRating);
+}

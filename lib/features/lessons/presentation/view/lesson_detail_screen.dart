@@ -1,23 +1,27 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../../../presentation/view/piano.dart';
 import '../../domain/entities/lesson.dart';
+import '../providers/lessons_provider.dart' as progress_saver;
 import '../widget/keyboard_diagram.dart';
 
-class LessonDetailScreen extends StatefulWidget {
+class LessonDetailScreen extends ConsumerStatefulWidget {
   const LessonDetailScreen({super.key, required this.lesson});
   final Lesson lesson;
 
   @override
-  State<LessonDetailScreen> createState() => _LessonDetailScreenState();
+  ConsumerState<LessonDetailScreen> createState() => _LessonDetailScreenState();
 }
 
-class _LessonDetailScreenState extends State<LessonDetailScreen> {
+class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
   int _step = 0;
+  bool _completed = false;
+  int _selectedStars = 3;
   YoutubePlayerController? _ytController;
 
   List<_Step> get _steps {
@@ -59,11 +63,28 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
     if (_step > 0) setState(() => _step--);
   }
 
+  Future<void> _complete() async {
+    await progress_saver.saveProgress(
+      ref,
+      widget.lesson.id,
+      starRating: _selectedStars,
+    );
+    setState(() => _completed = true);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final steps = _steps;
     final current = steps.isNotEmpty ? steps[_step] : _Step.practice;
+    final isLast = _step == steps.length - 1;
+
+    if (_completed) {
+      return _CompletionScreen(
+        lesson: widget.lesson,
+        stars: _selectedStars,
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -108,14 +129,22 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
               ),
             ),
           ),
-          _BottomNav(
-            step: _step,
-            total: steps.length,
-            currentStep: current,
-            lesson: widget.lesson,
-            onPrev: _step > 0 ? _prev : null,
-            onNext: _step < steps.length - 1 ? _next : null,
-          ),
+          if (isLast)
+            _CompletionNav(
+              selectedStars: _selectedStars,
+              onStarChanged: (s) => setState(() => _selectedStars = s),
+              onPrev: _step > 0 ? _prev : null,
+              onComplete: _complete,
+            )
+          else
+            _BottomNav(
+              step: _step,
+              total: steps.length,
+              currentStep: current,
+              lesson: widget.lesson,
+              onPrev: _step > 0 ? _prev : null,
+              onNext: _next,
+            ),
         ],
       ),
     );
@@ -545,7 +574,6 @@ class _BottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isLast = step == total - 1;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
@@ -569,33 +597,207 @@ class _BottomNav extends StatelessWidget {
               ),
               label: const Text('Back'),
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             )
           else
             const SizedBox.shrink(),
           const Spacer(),
-          if (!isLast)
-            FilledButton.icon(
-              onPressed: onNext,
-              label: const Text('Next'),
-              icon: HugeIcon(
-                icon: HugeIcons.strokeRoundedArrowRight01,
-                size: 16,
-                color: theme.colorScheme.onPrimary,
-              ),
-              iconAlignment: IconAlignment.end,
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
+          FilledButton.icon(
+            onPressed: onNext,
+            label: const Text('Next'),
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowRight01,
+              size: 16,
+              color: theme.colorScheme.onPrimary,
             ),
+            iconAlignment: IconAlignment.end,
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Completion nav (last step) ────────────────────────────────────────────────
+
+class _CompletionNav extends StatelessWidget {
+  const _CompletionNav({
+    required this.selectedStars,
+    required this.onStarChanged,
+    required this.onPrev,
+    required this.onComplete,
+  });
+
+  final int selectedStars;
+  final void Function(int) onStarChanged;
+  final VoidCallback? onPrev;
+  final VoidCallback onComplete;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor,
+        border: Border(
+          top: BorderSide(color: theme.colorScheme.outlineVariant.withAlpha(80)),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'How did it go?',
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(3, (i) {
+              final filled = i < selectedStars;
+              return GestureDetector(
+                onTap: () => onStarChanged(i + 1),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: HugeIcon(
+                    icon: filled
+                        ? HugeIcons.strokeRoundedStar
+                        : HugeIcons.strokeRoundedStarOff,
+                    size: 32,
+                    color: filled
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurface.withAlpha(60),
+                  ),
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              if (onPrev != null)
+                OutlinedButton.icon(
+                  onPressed: onPrev,
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedArrowLeft01,
+                    size: 16,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  label: const Text('Back'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                )
+              else
+                const SizedBox.shrink(),
+              const Spacer(),
+              FilledButton.icon(
+                onPressed: onComplete,
+                label: const Text('Complete'),
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedCheckmarkCircle01,
+                  size: 16,
+                  color: theme.colorScheme.onPrimary,
+                ),
+                iconAlignment: IconAlignment.end,
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Completion screen ─────────────────────────────────────────────────────────
+
+class _CompletionScreen extends StatelessWidget {
+  const _CompletionScreen({required this.lesson, required this.stars});
+  final Lesson lesson;
+  final int stars;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(),
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedMusicNote03,
+                size: 72,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Lesson Complete!',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                lesson.title,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 28),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(3, (i) {
+                  final filled = i < stars;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: HugeIcon(
+                      icon: filled
+                          ? HugeIcons.strokeRoundedStar
+                          : HugeIcons.strokeRoundedStarOff,
+                      size: 40,
+                      color: filled
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface.withAlpha(40),
+                    ),
+                  );
+                }),
+              ),
+              const Spacer(),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: const Text('Back to Lessons'),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
