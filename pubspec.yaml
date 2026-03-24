@@ -55,4 +55,5 @@ flutter:
   assets:
     - assets/sounds/shot/
     - assets/sounds/sustain/
+    - assets/images/pattern.svg
     - CHANGELOG.md

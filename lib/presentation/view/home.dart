@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import 'package:flutter_svg/flutter_svg.dart';
+
+import '../widget/featured_banners.dart';
 import '../../data/source/gamification.dart';
 
 class Home extends ConsumerWidget {
@@ -38,7 +41,7 @@ class Home extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
-            _FeaturedBanner(theme: theme, onTap: () => onSwitchTab?.call(1)),
+            FeaturedBannersList(onTap: () => onSwitchTab?.call(1)),
             const SizedBox(height: 12),
             _StatRow(
               theme: theme,
@@ -186,73 +189,6 @@ class _StatChip extends StatelessWidget {
   }
 }
 
-class _FeaturedBanner extends StatelessWidget {
-  const _FeaturedBanner({required this.theme, required this.onTap});
-  final ThemeData theme;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primary,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Start Learning',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'From beginner to virtuoso,\nat your own pace.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onPrimary.withAlpha(200),
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                FilledButton.tonal(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: theme.colorScheme.onPrimary,
-                    foregroundColor: theme.colorScheme.primary,
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 8),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    textStyle: theme.textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  onPressed: onTap,
-                  child: const Text('Browse Lessons'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          HugeIcon(
-            icon: HugeIcons.strokeRoundedMusicNote03,
-            color: theme.colorScheme.onPrimary.withAlpha(50),
-            size: 80,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _QuickCard extends StatelessWidget {
   const _QuickCard({
     required this.icon,
@@ -270,54 +206,70 @@ class _QuickCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Material(
-      color: theme.colorScheme.surfaceContainerHighest,
+      color: theme.colorScheme.primary,
       borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withAlpha(20),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: HugeIcon(
-                  icon: icon,
-                  color: theme.colorScheme.primary,
-                  size: 22,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: SvgPicture.asset(
+                'assets/images/pattern.svg',
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  theme.colorScheme.onPrimary.withAlpha(3),
+                  BlendMode.srcIn,
                 ),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.onPrimary.withAlpha(20),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    Text(
-                      subtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
+                    child: HugeIcon(
+                      icon: icon,
+                      color: theme.colorScheme.onPrimary,
+                      size: 22,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          label,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: theme.colorScheme.onPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          subtitle,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onPrimary.withAlpha(200),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedArrowRight01,
+                    color: theme.colorScheme.onPrimary.withAlpha(150),
+                    size: 18,
+                  ),
+                ],
               ),
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedArrowRight01,
-                color: theme.colorScheme.onSurfaceVariant,
-                size: 18,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

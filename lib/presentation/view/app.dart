@@ -19,15 +19,16 @@ class Ruth extends ConsumerWidget {
     ref.watch(loadSettings);
     ref.watch(loadGamification);
     final mode = ref.watch(themeModeProvider);
+    final themeColor = ref.watch(themeColorProvider);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Lumina Piano',
       theme: ThemeData.light(useMaterial3: true).copyWith(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFFF4081),
+          seedColor: themeColor,
           brightness: Brightness.light,
           surface: Colors.white,
-        ),
+        ).copyWith(primary: themeColor),
         scaffoldBackgroundColor: Colors.white,
         textTheme: GoogleFonts.outfitTextTheme(ThemeData.light().textTheme),
         appBarTheme: AppBarTheme(
@@ -46,10 +47,10 @@ class Ruth extends ConsumerWidget {
       ),
       darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFFF4081),
+          seedColor: themeColor,
           brightness: Brightness.dark,
           surface: Colors.black,
-        ),
+        ).copyWith(primary: themeColor),
         scaffoldBackgroundColor: Colors.black,
         textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
         appBarTheme: AppBarTheme(

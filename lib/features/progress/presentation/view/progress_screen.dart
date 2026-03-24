@@ -61,7 +61,8 @@ class ProgressScreen extends ConsumerWidget {
             lessonsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Text('Error: $e'),
-              data: (lessons) => _CoursesSection(theme: theme, lessons: lessons),
+              data: (lessons) =>
+                  _CoursesSection(theme: theme, lessons: lessons),
             ),
           ],
         ),
@@ -111,7 +112,7 @@ class _StatsSection extends StatelessWidget {
                 icon: HugeIcons.strokeRoundedFire,
                 label: '$streak day${streak == 1 ? '' : 's'}',
                 sublabel: 'Streak',
-                color: const Color(0xFFFF6B35),
+                color: theme.colorScheme.primary, // unified color
               ),
               const SizedBox(width: 12),
               _StatChip(
@@ -138,6 +139,7 @@ class _StatsSection extends StatelessWidget {
                     ? '$xp XP — Max Level'
                     : '$xp / ${playerLevel.maxXp + 1} XP',
                 style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.primary, // enhanced visibility
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -268,7 +270,8 @@ class _PracticeCalendar extends StatelessWidget {
               child: Row(
                 children: List.generate(7, (col) {
                   final dayOffset = (3 - row) * 7 + (6 - col);
-                  final cellDate = todayDate.subtract(Duration(days: dayOffset));
+                  final cellDate =
+                      todayDate.subtract(Duration(days: dayOffset));
                   final isToday = cellDate == todayDate;
                   final isPracticed =
                       lastPracticed != null && cellDate == lastPracticed;
