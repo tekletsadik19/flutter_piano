@@ -1,15 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
+import '../../../../data/source/player/player.dart';
 import '../../../../presentation/view/piano.dart';
+import '../../../../presentation/widget/piano_view.dart';
 import '../../domain/entities/lesson.dart';
 import '../providers/lessons_provider.dart' as progress_saver;
 import '../widget/keyboard_diagram.dart';
-import '../widget/lesson_practice_mode.dart';
 
 class LessonDetailScreen extends ConsumerStatefulWidget {
   const LessonDetailScreen({super.key, required this.lesson});
@@ -431,8 +433,31 @@ class _PracticeStep extends StatelessWidget {
                        lesson.content?.highlightedKeys.isNotEmpty == true;
 
     if (hasExercise) {
-      // Show real guided practice with embedded piano
-      return LessonPracticeMode(lesson: lesson);
+      // Open full-screen practice with real piano
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Ready to practice?',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => _LessonPracticeWithPiano(lesson: lesson),
+                  ),
+                ),
+                icon: const Icon(Icons.piano),
+                label: const Text('Start Practice'),
+              ),
+            ],
+          ),
+        ),
+      );
     } else {
       // Show free play mode
       return _FreePracticeMode(lesson: lesson);
@@ -568,6 +593,283 @@ class _TipRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ── Practice with real piano ───────────────────────────────────────────────
+
+class _LessonPracticeWithPiano extends ConsumerStatefulWidget {
+  const _LessonPracticeWithPiano({required this.lesson});
+  final Lesson lesson;
+
+  @override
+  ConsumerState<_LessonPracticeWithPiano> createState() =>
+      _LessonPracticeWithPianoState();
+}
+
+class _LessonPracticeWithPianoState
+    extends ConsumerState<_LessonPracticeWithPiano> {
+  final player = $Player();
+  late List<int> _notesToPlay;
+  late List<bool> _completedNotes;
+  int _currentIndex = 0;
+  int _attempts = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _notesToPlay = widget.lesson.content?.highlightedKeys ?? [];
+    _completedNotes = List<bool>.filled(_notesToPlay.length, false);
+  }
+
+  @override
+  void dispose() {
+    player.stopSustain();
+    super.dispose();
+  }
+
+  Future<void> play(int midi) async {
+    await player.play(midi, sustain: false);
+    _recordNotePressed(midi);
+  }
+
+  void _recordNotePressed(int midiNote) {
+    if (_currentIndex >= _notesToPlay.length) return;
+
+    _attempts++;
+    final expectedNote = _notesToPlay[_currentIndex];
+
+    if (midiNote == expectedNote) {
+      setState(() {
+        _completedNotes[_currentIndex] = true;
+        if (_currentIndex < _notesToPlay.length - 1) {
+          _currentIndex++;
+        }
+      });
+      HapticFeedback.mediumImpact();
+    } else {
+      HapticFeedback.lightImpact();
+    }
+  }
+
+  void _reset() {
+    setState(() {
+      _currentIndex = 0;
+      _attempts = 0;
+      _completedNotes = List<bool>.filled(_notesToPlay.length, false);
+    });
+  }
+
+  double get _progress => _completedNotes.isEmpty
+      ? 0
+      : _completedNotes.where((c) => c).length / _completedNotes.length;
+
+  bool get _isComplete =>
+      _completedNotes.isNotEmpty && _completedNotes.every((c) => c);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final content = widget.lesson.content;
+    final keyLabels = content?.keyLabels ?? {};
+
+    return Scaffold(
+      appBar: AppBar(
+        leading: const BackButton(),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Practice',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              widget.lesson.title,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: Column(
+        children: [
+          // ── Progress panel ────────────────────────────────────────
+          Container(
+            color: theme.colorScheme.surfaceContainer,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Progress',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${(_progress * 100).toStringAsFixed(0)}% • $_attempts attempts',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_isComplete)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withAlpha(80),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.green),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            HugeIcon(
+                              icon: HugeIcons.strokeRoundedCheckmarkCircle01,
+                              size: 14,
+                              color: Colors.green,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Complete!',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: _progress,
+                    minHeight: 8,
+                    backgroundColor: theme.colorScheme.outline.withAlpha(30),
+                    valueColor: AlwaysStoppedAnimation(
+                      _isComplete ? Colors.green : theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+                if (_notesToPlay.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: List.generate(_notesToPlay.length, (i) {
+                        final note = _notesToPlay[i];
+                        final isCompleted = _completedNotes[i];
+                        final isCurrent = i == _currentIndex;
+                        final noteLabel =
+                            keyLabels[note]?.toString() ?? note.toString();
+
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isCompleted
+                                  ? Colors.green.withAlpha(100)
+                                  : isCurrent
+                                      ? theme.colorScheme.primary
+                                          .withAlpha(150)
+                                      : theme.colorScheme.surfaceContainerHigh,
+                              border: Border.all(
+                                color: isCurrent
+                                    ? theme.colorScheme.primary
+                                    : isCompleted
+                                        ? Colors.green
+                                        : Colors.transparent,
+                                width: isCurrent ? 2 : 1,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  noteLabel,
+                                  style: theme.textTheme.labelMedium
+                                      ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                if (isCompleted) ...[
+                                  const SizedBox(width: 4),
+                                  HugeIcon(
+                                    icon: HugeIcons
+                                        .strokeRoundedCheckmarkCircle01,
+                                    size: 12,
+                                    color: Colors.green,
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          // ── Piano ─────────────────────────────────────────────────
+          Expanded(
+            child: PianoView(
+              octaves: 7,
+              onPlay: play,
+            ),
+          ),
+
+          // ── Action buttons ────────────────────────────────────────
+          if (_isComplete)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: _reset,
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedRepeat,
+                    color: theme.colorScheme.onPrimary,
+                    size: 20,
+                  ),
+                  label: const Text('Practice Again'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
