@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../data/source/gamification.dart';
-import '../../../lessons/domain/entities/lesson.dart';
 import '../../../lessons/presentation/providers/lessons_provider.dart';
+import '../widget/progress_dashboard.dart';
 
 class ProgressScreen extends ConsumerWidget {
   const ProgressScreen({super.key});
@@ -51,18 +51,11 @@ class ProgressScreen extends ConsumerWidget {
             const SizedBox(height: 10),
             _PracticeCalendar(theme: theme, lastDate: lastDate),
             const SizedBox(height: 24),
-            // --- Courses progress ---
-            _SectionHeader(
-              theme: theme,
-              icon: HugeIcons.strokeRoundedChartLineData01,
-              label: 'Courses',
-            ),
-            const SizedBox(height: 10),
+            // --- Learning analytics dashboard ---
             lessonsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Text('Error: $e'),
-              data: (lessons) =>
-                  _CoursesSection(theme: theme, lessons: lessons),
+              data: (lessons) => ProgressDashboard(lessons: lessons),
             ),
           ],
         ),
@@ -326,115 +319,6 @@ class _PracticeCalendar extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // Courses section
 // ---------------------------------------------------------------------------
-
-class _CoursesSection extends StatelessWidget {
-  const _CoursesSection({required this.theme, required this.lessons});
-
-  final ThemeData theme;
-  final List<Lesson> lessons;
-
-  @override
-  Widget build(BuildContext context) {
-    final beginner =
-        lessons.where((l) => l.level == LessonLevel.beginner).toList();
-    final intermediate =
-        lessons.where((l) => l.level == LessonLevel.intermediate).toList();
-    final advanced =
-        lessons.where((l) => l.level == LessonLevel.advanced).toList();
-
-    return Column(
-      children: [
-        _CourseRow(
-          theme: theme,
-          icon: HugeIcons.strokeRoundedMusicNote01,
-          label: 'Beginner',
-          lessons: beginner,
-        ),
-        const SizedBox(height: 10),
-        _CourseRow(
-          theme: theme,
-          icon: HugeIcons.strokeRoundedMusicNote02,
-          label: 'Intermediate',
-          lessons: intermediate,
-        ),
-        const SizedBox(height: 10),
-        _CourseRow(
-          theme: theme,
-          icon: HugeIcons.strokeRoundedMusicNote03,
-          label: 'Advanced',
-          lessons: advanced,
-        ),
-      ],
-    );
-  }
-}
-
-class _CourseRow extends StatelessWidget {
-  const _CourseRow({
-    required this.theme,
-    required this.icon,
-    required this.label,
-    required this.lessons,
-  });
-
-  final ThemeData theme;
-  final List<List<dynamic>> icon;
-  final String label;
-  final List<Lesson> lessons;
-
-  @override
-  Widget build(BuildContext context) {
-    final done = lessons.where((l) => l.isCompleted).length;
-    final total = lessons.length;
-    final progress = total > 0 ? done / total : 0.0;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              HugeIcon(
-                icon: icon,
-                color: theme.colorScheme.primary,
-                size: 18,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              Text(
-                '$done / $total',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 6,
-              backgroundColor: theme.colorScheme.outline.withAlpha(30),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Shared helpers

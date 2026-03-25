@@ -1,5 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../../data/lessons/intermediate_lessons.dart';
+import '../../../../../data/lessons/advanced_lessons.dart';
 import '../../domain/entities/lesson.dart';
 import '../../domain/repositories/lesson_repository.dart';
 import '../models/lesson_model.dart';
@@ -1812,6 +1814,16 @@ class LessonRepositoryImpl implements LessonRepository {
         keyLabels: {55: 'G', 59: 'B', 62: 'D', 67: 'G'},
       ),
     ),
+
+    // ════════════════════════════════════════════════════════════════════════
+    // ADDITIONAL INTERMEDIATE LESSONS (from data layer)
+    // ════════════════════════════════════════════════════════════════════════
+    ...intermediateLessons,
+
+    // ════════════════════════════════════════════════════════════════════════
+    // ADDITIONAL ADVANCED LESSONS (from data layer)
+    // ════════════════════════════════════════════════════════════════════════
+    ...advancedLessons,
   ];
 
   // ─────────────────────────────────────────────────────────────────────────
